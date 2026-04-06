@@ -48,74 +48,110 @@ export default function GuidedQuestion({ question, contactName, onComplete }: Gu
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
     >
-      <div className="bg-navy-800 rounded-2xl p-6 border border-navy-600 mb-4">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="bg-agent-blue/20 text-agent-blue px-3 py-1 rounded-full text-sm font-medium">
+      <div className="dossier rounded-2xl" style={{ padding: '2.5rem 3rem', marginBottom: '1.5rem' }}>
+        {/* Header badges */}
+        <div className="flex items-center" style={{ gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <span
+            className="rounded-full text-sm font-medium"
+            style={{
+              padding: '0.35rem 1rem',
+              background: 'rgba(59, 130, 246, 0.12)',
+              color: '#60a5fa',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+            }}
+          >
             Guided Practice
           </span>
-          <span className="text-gray-500 text-sm">
-            Step {currentStep + 1} of {steps.length}
+          <span className="text-midnight-500 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}>
+            Step {currentStep + 1}/{steps.length}
           </span>
         </div>
 
-        <div className="flex justify-between items-start mb-6">
-          <p className="text-gray-100 text-xl leading-relaxed flex-1">{question.problemText}</p>
+        {/* Problem text */}
+        <div className="flex justify-between items-start" style={{ marginBottom: '2rem' }}>
+          <p className="text-gray-100 text-xl flex-1" style={{ lineHeight: '1.8', marginRight: '1rem' }}>{question.problemText}</p>
           <ReadAloud text={question.problemText} />
         </div>
 
-        <div className="flex items-start gap-4 mb-4">
-          <PlaceholderImage width={60} height={60} label={contactName} bgColor="#334155" />
-          <div className="flex-1 bg-navy-700 rounded-xl p-4">
-            <p className="text-gray-200">{steps[currentStep]?.instruction}</p>
+        {/* Contact instruction */}
+        <div className="flex items-start" style={{ gap: '1rem', marginBottom: '1.5rem' }}>
+          <PlaceholderImage width={60} height={60} label={contactName} bgColor="#0b0f24" />
+          <div
+            className="flex-1 rounded-xl"
+            style={{
+              padding: '1rem 1.25rem',
+              background: 'rgba(6, 8, 24, 0.6)',
+              border: '1px solid rgba(37, 48, 82, 0.5)',
+            }}
+          >
+            <p className="text-gray-200" style={{ lineHeight: '1.7' }}>{steps[currentStep]?.instruction}</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex gap-3">
+        {/* Answer input */}
+        <form onSubmit={handleSubmit} className="flex" style={{ gap: '0.75rem' }}>
           <input
             type="number"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            className="flex-1 px-4 py-3 bg-navy-700 border border-navy-600 rounded-xl text-white text-xl focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition"
+            className="flex-1 bg-midnight-950 border border-midnight-500 rounded-xl text-white text-xl focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition"
+            style={{ padding: '0.85rem 1.25rem' }}
             placeholder="Your answer..."
             disabled={feedback !== null}
             autoFocus
           />
-          <button
+          <motion.button
             type="submit"
             disabled={!input.trim() || feedback !== null}
-            className="px-6 py-3 bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold rounded-xl transition disabled:opacity-50"
+            className="text-midnight-950 font-bold rounded-xl transition disabled:opacity-50"
+            style={{
+              padding: '0.85rem 2rem',
+              background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+            }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
           >
             Check
-          </button>
+          </motion.button>
         </form>
 
+        {/* Feedback */}
         <AnimatePresence>
           {feedback && (
             <motion.div
-              className={`mt-4 p-4 rounded-xl border ${
-                feedback.correct
-                  ? 'bg-green-900/30 border-agent-green text-green-200'
-                  : 'bg-red-900/30 border-agent-red text-red-200'
-              }`}
+              className="rounded-xl"
+              style={{
+                marginTop: '1.25rem',
+                padding: '1rem 1.25rem',
+                lineHeight: '1.6',
+                background: feedback.correct ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                border: `1px solid ${feedback.correct ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
+                color: feedback.correct ? '#86efac' : '#fca5a5',
+              }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
             >
-              <span className="mr-2">{feedback.correct ? '✓' : '✗'}</span>
+              {feedback.correct ? 'Correct! ' : 'Not quite. '}
               {feedback.text}
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Step progress dots */}
-      <div className="flex justify-center gap-2">
+      {/* Step progress dots — elongated active dot */}
+      <div className="flex justify-center" style={{ gap: '0.5rem' }}>
         {steps.map((_, i) => (
-          <div
+          <motion.div
             key={i}
-            className={`w-3 h-3 rounded-full transition ${
-              i < currentStep ? 'bg-agent-green' : i === currentStep ? 'bg-gold-400' : 'bg-navy-600'
-            }`}
+            className="rounded-full transition"
+            style={{
+              width: i === currentStep ? '24px' : '10px',
+              height: '10px',
+              backgroundColor: i < currentStep ? '#22c55e' : i === currentStep ? '#fbbf24' : '#1a2242',
+              boxShadow: i === currentStep ? '0 0 8px rgba(251, 191, 36, 0.4)' : 'none',
+            }}
+            layout
           />
         ))}
       </div>

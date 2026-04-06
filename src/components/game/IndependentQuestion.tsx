@@ -29,7 +29,6 @@ export default function IndependentQuestion({
     setResult(attemptResult);
 
     if (attemptResult.correct) {
-      // Move to next after a short delay
       setTimeout(() => {
         setInput('');
         setResult(null);
@@ -37,7 +36,6 @@ export default function IndependentQuestion({
         onNext();
       }, 1500);
     } else if (!attemptResult.isFirstAttempt) {
-      // Second wrong attempt — show solution
       setShowSolution(true);
     }
   };
@@ -61,44 +59,71 @@ export default function IndependentQuestion({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
     >
-      <div className="bg-navy-800 rounded-2xl p-6 border border-navy-600">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="bg-gold-400/20 text-gold-400 px-3 py-1 rounded-full text-sm font-medium">
+      <div className="dossier rounded-2xl" style={{ padding: '2rem 2.5rem' }}>
+        {/* Header badges */}
+        <div className="flex items-center" style={{ gap: '0.75rem', marginBottom: '1.5rem' }}>
+          <span
+            className="rounded-full text-sm font-medium"
+            style={{
+              padding: '0.35rem 1rem',
+              background: 'rgba(251, 191, 36, 0.1)',
+              color: '#fbbf24',
+              border: '1px solid rgba(251, 191, 36, 0.2)',
+            }}
+          >
             Independent Mission
           </span>
           {!isFirstAttempt && (
-            <span className="bg-agent-red/20 text-agent-red px-3 py-1 rounded-full text-sm font-medium">
+            <span
+              className="rounded-full text-sm font-medium"
+              style={{
+                padding: '0.35rem 1rem',
+                background: 'rgba(239, 68, 68, 0.1)',
+                color: '#fca5a5',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+              }}
+            >
               Second Attempt
             </span>
           )}
         </div>
 
-        <div className="flex justify-between items-start mb-4">
-          <p className="text-gray-100 text-xl leading-relaxed flex-1">{question.problemText}</p>
+        {/* Problem text */}
+        <div className="flex justify-between items-start" style={{ marginBottom: '2rem' }}>
+          <p className="text-gray-100 text-xl flex-1" style={{ lineHeight: '1.8', marginRight: '1rem' }}>{question.problemText}</p>
           <ReadAloud text={question.problemText} />
         </div>
 
+        {/* Answer input */}
         {!showSolution ? (
-          <form onSubmit={handleSubmit} className="flex gap-3 mb-4">
+          <form onSubmit={handleSubmit} className="flex" style={{ gap: '0.75rem', marginBottom: '1.25rem' }}>
             <input
               type="number"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 px-4 py-3 bg-navy-700 border border-navy-600 rounded-xl text-white text-xl focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition"
+              className="flex-1 bg-midnight-950 border border-midnight-500 rounded-xl text-white text-xl focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition"
+              style={{ padding: '0.85rem 1.25rem' }}
               placeholder="Your answer..."
               disabled={result !== null}
               autoFocus
             />
-            <button
+            <motion.button
               type="submit"
               disabled={!input.trim() || result !== null}
-              className="px-6 py-3 bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold rounded-xl transition disabled:opacity-50"
+              className="text-midnight-950 font-bold rounded-xl transition disabled:opacity-50"
+              style={{
+                padding: '0.85rem 2rem',
+                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+              }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
               Submit
-            </button>
+            </motion.button>
           </form>
         ) : null}
 
+        {/* Feedback / Hint / Solution */}
         <AnimatePresence mode="wait">
           {result && !showSolution && (
             <motion.div
@@ -108,24 +133,47 @@ export default function IndependentQuestion({
               exit={{ opacity: 0 }}
             >
               {result.correct ? (
-                <div className="p-4 rounded-xl bg-green-900/30 border border-agent-green text-green-200">
-                  <span className="text-2xl mr-2">✓</span>
+                <div
+                  className="rounded-xl"
+                  style={{
+                    padding: '1rem 1.25rem',
+                    lineHeight: '1.6',
+                    background: 'rgba(34, 197, 94, 0.1)',
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    color: '#86efac',
+                  }}
+                >
                   {result.isFirstAttempt
                     ? 'Excellent work, Agent! +1 point!'
                     : 'Correct! No points this time, but great job figuring it out.'}
                 </div>
               ) : result.isFirstAttempt ? (
-                <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-yellow-900/30 border border-yellow-500 text-yellow-200">
-                    <span className="text-2xl mr-2">💡</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div
+                    className="rounded-xl"
+                    style={{
+                      padding: '1rem 1.25rem',
+                      lineHeight: '1.6',
+                      background: 'rgba(234, 179, 8, 0.08)',
+                      border: '1px solid rgba(234, 179, 8, 0.25)',
+                      color: '#fde68a',
+                    }}
+                  >
                     <strong>Hint:</strong> {question.hint}
                   </div>
-                  <button
+                  <motion.button
                     onClick={handleTryAgain}
-                    className="w-full py-3 bg-agent-blue hover:bg-blue-700 text-white font-bold rounded-xl transition text-lg"
+                    className="w-full text-white font-bold rounded-xl transition text-lg"
+                    style={{
+                      padding: '1rem',
+                      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.25)',
+                    }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Try Again
-                  </button>
+                  </motion.button>
                 </div>
               ) : null}
             </motion.div>
@@ -136,26 +184,50 @@ export default function IndependentQuestion({
               key="solution"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-4"
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
             >
-              <div className="p-4 rounded-xl bg-red-900/30 border border-agent-red text-red-200">
-                <span className="text-2xl mr-2">✗</span>
+              <div
+                className="rounded-xl"
+                style={{
+                  padding: '1rem 1.25rem',
+                  lineHeight: '1.6',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  color: '#fca5a5',
+                }}
+              >
                 Not quite right.{' '}
                 {result && result.pointsChange < 0
                   ? 'You lost 1 point.'
                   : 'No points lost.'}
               </div>
-              <div className="p-4 rounded-xl bg-navy-700 border border-navy-600">
-                <p className="text-gold-400 font-bold mb-1">Solution:</p>
-                <p className="text-gray-200">{question.solution}</p>
-                <p className="text-gray-400 mt-2">The answer was: <strong className="text-white">{question.answer}</strong></p>
+              <div
+                className="rounded-xl"
+                style={{
+                  padding: '1.25rem 1.5rem',
+                  background: 'rgba(6, 8, 24, 0.6)',
+                  border: '1px solid rgba(37, 48, 82, 0.5)',
+                }}
+              >
+                <p className="text-amber-400 font-bold" style={{ marginBottom: '0.5rem', fontFamily: "'Fredoka', sans-serif" }}>Solution:</p>
+                <p className="text-gray-200" style={{ lineHeight: '1.7' }}>{question.solution}</p>
+                <p className="text-gray-400" style={{ marginTop: '0.75rem' }}>
+                  The answer was: <strong className="text-white font-mono">{question.answer}</strong>
+                </p>
               </div>
-              <button
+              <motion.button
                 onClick={handleNextAfterSolution}
-                className="w-full py-3 bg-gold-500 hover:bg-gold-600 text-navy-900 font-bold rounded-xl transition text-lg"
+                className="w-full text-midnight-950 font-bold rounded-xl transition text-lg"
+                style={{
+                  padding: '1rem',
+                  background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                  boxShadow: '0 4px 20px rgba(251, 191, 36, 0.25)',
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
                 Next Question
-              </button>
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>

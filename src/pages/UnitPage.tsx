@@ -59,9 +59,9 @@ export default function UnitPage() {
 
   if (!unit || !tip) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-navy-900">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#060818' }}>
         <p className="text-gray-400">Unit not found.</p>
-        <button onClick={() => navigate('/home')} className="text-gold-400 ml-2">
+        <button onClick={() => navigate('/home')} className="text-amber-400 ml-2">
           Go home
         </button>
       </div>
@@ -87,7 +87,6 @@ export default function UnitPage() {
     }));
 
     if (newCount >= GUIDED_COUNT) {
-      // Switch to independent questions
       generateNewQuestion(false);
       setSession((s) => ({ ...s, currentPhase: 'independent', guidedQuestionsCompleted: newCount }));
     } else {
@@ -124,7 +123,6 @@ export default function UnitPage() {
     navigate('/home');
   };
 
-  // Check if scoring just completed (after answer but before next)
   useEffect(() => {
     if (isComplete && session.currentPhase === 'independent') {
       completeUnit(unit.id);
@@ -133,81 +131,107 @@ export default function UnitPage() {
   }, [isComplete, session.currentPhase, completeUnit, unit.id]);
 
   return (
-    <div className="min-h-screen bg-navy-900">
-      <AnimatePresence mode="wait">
-        {session.currentPhase === 'mission-intro' && (
-          <MissionIntro key="intro" unit={unit} onContinue={handleMissionIntroContinue} />
-        )}
+    <div className="h-screen flex flex-col overflow-hidden" style={{ backgroundColor: '#060818' }}>
+      {/* Top bar */}
+      <header
+        className="flex items-center justify-between shrink-0 h-14 relative"
+        style={{
+          padding: '0 0.5in',
+          background: 'linear-gradient(180deg, #0b0f24, #060818)',
+          borderBottom: '1px solid rgba(37, 48, 82, 0.5)',
+        }}
+      >
+        {/* Accent line */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2px]"
+          style={{ background: 'linear-gradient(90deg, transparent, #f59e0b, #2dd4bf, #f59e0b, transparent)' }}
+        />
 
-        {session.currentPhase === 'meet-contact' && (
-          <TourGuide
-            key="guide"
-            contactName={unit.contactName}
-            tip={tip}
-            onContinue={handleTourGuideContinue}
-          />
-        )}
+        <h1
+          className="font-bold text-lg"
+          style={{
+            fontFamily: "'Fredoka', sans-serif",
+            background: 'linear-gradient(135deg, #fbbf24, #fcd34d)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}
+        >
+          {unit.city} — {unit.title}
+        </h1>
+        <button
+          onClick={handleSaveAndExit}
+          className="bg-midnight-700 hover:bg-midnight-600 text-gray-300 hover:text-white rounded-lg transition text-sm whitespace-nowrap min-h-0 border border-midnight-500"
+          style={{ padding: '0.35rem 1rem' }}
+        >
+          Save & Exit
+        </button>
+      </header>
 
-        {session.currentPhase === 'guided' && currentQuestion && (
-          <div key="guided" className="min-h-screen flex flex-col items-center pt-6 px-4">
-            <div className="w-full max-w-2xl flex items-center justify-between mb-6">
-              <ProgressBar
-                current={session.guidedQuestionsCompleted}
-                max={GUIDED_COUNT}
-                label="Guided Practice"
-              />
-              <button
-                onClick={handleSaveAndExit}
-                className="ml-4 px-4 py-2 bg-navy-700 hover:bg-navy-600 text-gray-300 rounded-lg transition text-sm whitespace-nowrap"
-              >
-                Save & Exit
-              </button>
-            </div>
-            <GuidedQuestion
-              question={currentQuestion}
+      {/* Game content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <AnimatePresence mode="wait">
+          {session.currentPhase === 'mission-intro' && (
+            <MissionIntro key="intro" unit={unit} onContinue={handleMissionIntroContinue} />
+          )}
+
+          {session.currentPhase === 'meet-contact' && (
+            <TourGuide
+              key="guide"
               contactName={unit.contactName}
-              onComplete={handleGuidedComplete}
+              tip={tip}
+              onContinue={handleTourGuideContinue}
             />
-          </div>
-        )}
+          )}
 
-        {session.currentPhase === 'independent' && currentQuestion && (
-          <div key="independent" className="min-h-screen flex flex-col items-center pt-6 px-4">
-            <div className="w-full max-w-2xl flex items-center justify-between mb-6">
-              <ScoreDisplay points={points} maxPoints={maxPoints} lastChange={lastChange} />
-              <button
-                onClick={handleSaveAndExit}
-                className="ml-4 px-4 py-2 bg-navy-700 hover:bg-navy-600 text-gray-300 rounded-lg transition text-sm whitespace-nowrap"
-              >
-                Save & Exit
-              </button>
+          {session.currentPhase === 'guided' && currentQuestion && (
+            <div key="guided" className="flex-1 flex flex-col items-center overflow-auto" style={{ padding: '0.5in' }}>
+              <div className="w-full max-w-2xl mb-4">
+                <ProgressBar
+                  current={session.guidedQuestionsCompleted}
+                  max={GUIDED_COUNT}
+                  label="Guided Practice"
+                />
+              </div>
+              <GuidedQuestion
+                question={currentQuestion}
+                contactName={unit.contactName}
+                onComplete={handleGuidedComplete}
+              />
             </div>
-            <IndependentQuestion
-              key={session.questionsAttempted}
-              question={currentQuestion}
-              onAnswer={handleIndependentAnswer}
-              onNext={handleNextQuestion}
-              isFirstAttempt={isFirstAttempt}
+          )}
+
+          {session.currentPhase === 'independent' && currentQuestion && (
+            <div key="independent" className="flex-1 flex flex-col items-center overflow-auto" style={{ padding: '0.5in' }}>
+              <div className="w-full max-w-2xl mb-4">
+                <ScoreDisplay points={points} maxPoints={maxPoints} lastChange={lastChange} />
+              </div>
+              <IndependentQuestion
+                key={session.questionsAttempted}
+                question={currentQuestion}
+                onAnswer={handleIndependentAnswer}
+                onNext={handleNextQuestion}
+                isFirstAttempt={isFirstAttempt}
+              />
+            </div>
+          )}
+
+          {session.currentPhase === 'code-reveal' && (
+            <CodePieceReveal key="reveal" unit={unit} onContinue={handleCodeRevealContinue} />
+          )}
+
+          {session.currentPhase === 'summary' && (
+            <SessionSummary
+              key="summary"
+              unit={unit}
+              pointsEarned={points}
+              questionsAttempted={session.questionsAttempted}
+              questionsCorrectFirstTry={session.questionsCorrectFirstTry}
+              startedAt={session.startedAt}
+              onGoHome={() => navigate('/home')}
             />
-          </div>
-        )}
-
-        {session.currentPhase === 'code-reveal' && (
-          <CodePieceReveal key="reveal" unit={unit} onContinue={handleCodeRevealContinue} />
-        )}
-
-        {session.currentPhase === 'summary' && (
-          <SessionSummary
-            key="summary"
-            unit={unit}
-            pointsEarned={points}
-            questionsAttempted={session.questionsAttempted}
-            questionsCorrectFirstTry={session.questionsCorrectFirstTry}
-            startedAt={session.startedAt}
-            onGoHome={() => navigate('/home')}
-          />
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

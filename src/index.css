@@ -1,25 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  /* Spy/Agent Color Palette */
-  --color-navy-900: #0a0e1a;
-  --color-navy-800: #111827;
-  --color-navy-700: #1e293b;
-  --color-navy-600: #334155;
-  --color-navy-500: #475569;
+  /* Midnight Spy Palette — deep indigo base with electric accents */
+  --color-midnight-950: #060818;
+  --color-midnight-900: #0b0f24;
+  --color-midnight-800: #121833;
+  --color-midnight-700: #1a2242;
+  --color-midnight-600: #253052;
+  --color-midnight-500: #374569;
 
+  /* Electric amber — warm, punchy gold */
+  --color-amber-300: #fcd34d;
+  --color-amber-400: #fbbf24;
+  --color-amber-500: #f59e0b;
+  --color-amber-600: #d97706;
+
+  /* Teal accent — for variety and "tech" feel */
+  --color-teal-400: #2dd4bf;
+  --color-teal-500: #14b8a6;
+
+  /* Status colors */
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-info: #3b82f6;
+  --color-warning: #eab308;
+
+  /* Legacy aliases so existing tailwind classes keep working */
+  --color-navy-900: #060818;
+  --color-navy-800: #0b0f24;
+  --color-navy-700: #121833;
+  --color-navy-600: #1a2242;
+  --color-navy-500: #253052;
   --color-gold-400: #fbbf24;
   --color-gold-500: #f59e0b;
   --color-gold-600: #d97706;
+  --color-agent-red: #ef4444;
+  --color-agent-green: #22c55e;
+  --color-agent-blue: #3b82f6;
 
-  --color-agent-red: #dc2626;
-  --color-agent-green: #16a34a;
-  --color-agent-blue: #2563eb;
-
-  /* Font sizes for kids */
+  /* Typography scale */
   --font-size-question: 1.375rem;
   --font-size-heading: 2rem;
-  --font-size-body: 1.125rem;
+  --font-size-body: 1.1rem;
 }
 
 * {
@@ -29,11 +51,12 @@
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: var(--font-size-body);
-  background-color: var(--color-navy-900);
-  color: white;
+  background-color: var(--color-midnight-950);
+  color: #e8e4f0;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 #root {
@@ -42,14 +65,152 @@ body {
   flex-direction: column;
 }
 
+/* Headings use Fredoka — playful, rounded, distinctive */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fredoka', 'Space Grotesk', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Monospace for code/numbers */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
 /* Large tap targets for young students */
 button, a, input, select {
   min-height: 48px;
   font-size: var(--font-size-body);
 }
 
-/* Focus rings for accessibility */
+/* Focus rings — teal for accessibility */
 :focus-visible {
-  outline: 3px solid var(--color-gold-400);
+  outline: 3px solid var(--color-teal-400);
   outline-offset: 2px;
 }
+
+/* Subtle scanline texture overlay */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(6, 8, 24, 0.15) 2px,
+    rgba(6, 8, 24, 0.15) 4px
+  );
+  z-index: 1;
+}
+
+/* Radar sweep animation for the world map */
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.radar-sweep {
+  animation: radar-sweep 8s linear infinite;
+}
+
+/* Pulse glow for active pins */
+@keyframes pin-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px currentColor; }
+  50% { box-shadow: 0 0 20px 6px currentColor; }
+}
+
+.pin-glow {
+  animation: pin-glow 2s ease-in-out infinite;
+}
+
+/* Classified stamp shake */
+@keyframes stamp {
+  0% { transform: scale(3) rotate(-12deg); opacity: 0; }
+  60% { transform: scale(1) rotate(-12deg); opacity: 1; }
+  70% { transform: scale(1.05) rotate(-10deg); }
+  100% { transform: scale(1) rotate(-12deg); opacity: 1; }
+}
+
+.stamp-in {
+  animation: stamp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Typewriter cursor blink */
+@keyframes blink-caret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typing-cursor::after {
+  content: '|';
+  color: var(--color-amber-400);
+  animation: blink-caret 0.8s infinite;
+  margin-left: 2px;
+}
+
+/* Grid pattern background */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(37, 48, 82, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 48, 82, 0.3) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Dossier paper texture */
+.dossier {
+  background:
+    linear-gradient(135deg, var(--color-midnight-800) 0%, var(--color-midnight-700) 50%, var(--color-midnight-800) 100%);
+  border: 1px solid var(--color-midnight-500);
+  position: relative;
+}
+
+.dossier::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-amber-500), var(--color-teal-400), var(--color-amber-500));
+  border-radius: 999px 999px 0 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-midnight-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-midnight-500);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-midnight-600);
+}
+
+/* Stagger animation helper */
+.stagger-in > * {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: stagger-fade 0.5s ease forwards;
+}
+
+@keyframes stagger-fade {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stagger-in > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-in > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-in > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-in > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-in > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-in > *:nth-child(6) { animation-delay: 0.6s; }
