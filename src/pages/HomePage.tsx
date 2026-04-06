@@ -6,6 +6,7 @@ import {
   Geographies,
   Geography,
   Graticule,
+  Marker,
 } from 'react-simple-maps';
 import { useAuth } from '../contexts/AuthContext';
 import { useProgress } from '../hooks/useProgress';
@@ -15,14 +16,14 @@ import PlaceholderImage from '../components/ui/PlaceholderImage';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
-/* Pin positions as % of the map container */
-const cityPositions: Record<string, { x: number; y: number }> = {
-  'unit-1': { x: 48, y: 25 },   // Paris
-  'unit-2': { x: 22, y: 32 },   // New York
-  'unit-3': { x: 82, y: 34 },   // Tokyo
-  'unit-4': { x: 54, y: 45 },   // Cairo
-  'unit-5': { x: 83, y: 75 },   // Sydney
-  'unit-6': { x: 50, y: 58 },   // Secret HQ
+/* Real lat/lon coordinates for each city */
+const cityCoords: Record<string, [number, number]> = {
+  'unit-1': [2.35, 48.86],      // Paris
+  'unit-2': [-74.0, 40.71],     // New York
+  'unit-3': [139.69, 35.69],    // Tokyo
+  'unit-4': [31.24, 30.04],     // Cairo
+  'unit-5': [151.21, -33.87],   // Sydney
+  'unit-6': [20, -5],           // Secret HQ (central Africa / mystery)
 };
 
 const statusPinColors: Record<string, string> = {
@@ -162,6 +163,90 @@ export default function HomePage() {
                 ))
               }
             </Geographies>
+
+            {/* Dashed route lines between cities (in projected SVG space) */}
+            {[
+              ['unit-2', 'unit-1'],  // NY → Paris
+              ['unit-1', 'unit-4'],  // Paris → Cairo
+              ['unit-4', 'unit-3'],  // Cairo → Tokyo
+              ['unit-3', 'unit-5'],  // Tokyo → Sydney
+              ['unit-5', 'unit-6'],  // Sydney → HQ
+            ].map(([from, to], i) => (
+              <Marker key={`route-${i}`} coordinates={cityCoords[from]}>
+                {/* We draw lines via a separate SVG layer below */}
+              </Marker>
+            ))}
+
+            {/* City pin markers — positioned by real lat/lon */}
+            {units.map((unit, index) => {
+              const coords = cityCoords[unit.id];
+              const unitProgress = progress?.units[unit.id];
+              const status = unitProgress?.status || 'not-started';
+              const isLocked = status === 'locked';
+              const pinColor = statusPinColors[status];
+
+              return (
+                <Marker key={unit.id} coordinates={coords}>
+                  {/* Glow ring */}
+                  {!isLocked && status !== 'completed' && (
+                    <circle r={10} fill="none" stroke={pinColor} strokeWidth={1.5} opacity={0.4}>
+                      <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                  )}
+
+                  {/* Completed ring */}
+                  {status === 'completed' && (
+                    <circle r={9} fill="none" stroke={pinColor} strokeWidth={1.5} opacity={0.5} />
+                  )}
+
+                  {/* Pin circle */}
+                  <circle
+                    r={7}
+                    fill={pinColor}
+                    stroke="rgba(255,255,255,0.25)"
+                    strokeWidth={1.5}
+                    opacity={isLocked ? 0.3 : 1}
+                    cursor={isLocked ? 'not-allowed' : 'pointer'}
+                    onClick={() => handleUnitClick(unit.id)}
+                    onMouseEnter={() => setHoveredUnit(unit.id)}
+                    onMouseLeave={() => setHoveredUnit(null)}
+                    style={{ filter: isLocked ? 'none' : `drop-shadow(0 0 6px ${pinColor})` }}
+                  />
+
+                  {/* Icon inside pin */}
+                  {status === 'completed' ? (
+                    <path
+                      d="M-3,0 L-1,2.5 L3,-2"
+                      stroke="white" strokeWidth={1.8} fill="none" strokeLinecap="round" strokeLinejoin="round"
+                      pointerEvents="none"
+                    />
+                  ) : isLocked ? (
+                    <g pointerEvents="none" opacity={0.5}>
+                      <rect x={-3} y={-0.5} width={6} height={4.5} rx={1} stroke="white" strokeWidth={0.8} fill="none" />
+                      <path d="M-1.5,-0.5 L-1.5,-2 A1.5,1.5 0 0,1 1.5,-2 L1.5,-0.5" stroke="white" strokeWidth={0.8} fill="none" />
+                    </g>
+                  ) : (
+                    <circle r={2} fill="rgba(255,255,255,0.8)" pointerEvents="none" />
+                  )}
+
+                  {/* City name label */}
+                  <text
+                    textAnchor="middle"
+                    y={18}
+                    style={{
+                      fontFamily: "'Space Grotesk', sans-serif",
+                      fontSize: '8px',
+                      fontWeight: 700,
+                      fill: isLocked ? '#374569' : '#e8e4f0',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    {unit.city}
+                  </text>
+                </Marker>
+              );
+            })}
           </ComposableMap>
         </div>
 
@@ -178,171 +263,68 @@ export default function HomePage() {
           }}
         />
 
-        {/* Dashed route lines (SVG overlay) */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {[
-            [22, 32, 48, 25],
-            [48, 25, 54, 45],
-            [54, 45, 82, 34],
-            [82, 34, 83, 75],
-            [83, 75, 50, 58],
-          ].map(([x1, y1, x2, y2], i) => (
-            <line
-              key={`route-${i}`}
-              x1={x1} y1={y1}
-              x2={x2} y2={y2}
-              stroke="#fbbf24"
-              strokeWidth="0.15"
-              strokeDasharray="0.8 1"
-              opacity="0.2"
-            />
-          ))}
-        </svg>
-
-        {/* City pins */}
-        {units.map((unit, index) => {
-          const pos = cityPositions[unit.id];
+        {/* Hover tooltips — HTML overlay positioned via state */}
+        {units.map((unit) => {
           const unitProgress = progress?.units[unit.id];
           const status = unitProgress?.status || 'not-started';
-          const isLocked = status === 'locked';
           const pinColor = statusPinColors[status];
           const isHovered = hoveredUnit === unit.id;
 
+          if (!isHovered) return null;
+
           return (
-            <motion.div
-              key={unit.id}
-              className="absolute"
-              style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)' }}
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 + index * 0.12, type: 'spring', stiffness: 200 }}
-            >
-              {/* Glow ring for available/in-progress */}
-              {!isLocked && status !== 'completed' && (
-                <div
-                  className="absolute -inset-2 rounded-full pin-glow"
-                  style={{ color: pinColor, opacity: 0.5 }}
-                />
-              )}
-
-              {/* Completed checkmark ring */}
-              {status === 'completed' && (
-                <div
-                  className="absolute -inset-1 rounded-full"
-                  style={{
-                    border: `2px solid ${pinColor}`,
-                    opacity: 0.5,
-                  }}
-                />
-              )}
-
-              {/* Pin button */}
-              <button
-                onClick={() => handleUnitClick(unit.id)}
-                onMouseEnter={() => setHoveredUnit(unit.id)}
-                onMouseLeave={() => setHoveredUnit(null)}
-                disabled={isLocked}
-                className={`relative z-10 w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-all min-h-0 ${
-                  isLocked ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:scale-125'
-                }`}
+            <AnimatePresence key={unit.id}>
+              <motion.div
+                className="absolute z-50 pointer-events-none"
                 style={{
-                  backgroundColor: pinColor,
-                  border: '2px solid rgba(255,255,255,0.2)',
-                  boxShadow: isLocked ? 'none' : `0 0 16px ${pinColor}40`,
+                  /* Position tooltip near the pin using a rough screen mapping */
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -120%)',
                 }}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 6 }}
+                transition={{ duration: 0.15 }}
               >
-                {status === 'completed' ? (
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M3 8L6.5 11.5L13 4.5" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : isLocked ? (
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <rect x="2" y="6" width="10" height="7" rx="1.5" stroke="white" strokeWidth="1.5" opacity="0.6" />
-                    <path d="M4.5 6V4.5C4.5 3.12 5.62 2 7 2C8.38 2 9.5 3.12 9.5 4.5V6" stroke="white" strokeWidth="1.5" opacity="0.6" />
-                  </svg>
-                ) : (
-                  <div className="w-3 h-3 rounded-full bg-white/80" />
-                )}
-              </button>
-
-              {/* City label */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 whitespace-nowrap text-center pointer-events-none">
-                <p
-                  className="text-xs font-bold drop-shadow-lg"
+                <div
+                  className="dossier rounded-xl shadow-2xl w-64"
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    color: isLocked ? '#374569' : '#e8e4f0',
-                    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                    padding: '1.25rem 1.5rem',
+                    boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 1px ${pinColor}40`,
                   }}
                 >
-                  {unit.city}
-                </p>
-              </div>
+                  <div className="mb-3 rounded-lg overflow-hidden">
+                    <PlaceholderImage
+                      width={208}
+                      height={90}
+                      label={`${unit.city}, ${unit.country}`}
+                      bgColor="#0b0f24"
+                    />
+                  </div>
 
-              {/* Hover tooltip */}
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.div
-                    className="absolute z-50 pointer-events-none"
-                    style={{
-                      ...(pos.y > 50
-                        ? { bottom: '100%', marginBottom: '16px' }
-                        : { top: '100%', marginTop: '16px' }),
-                      ...(pos.x < 30
-                        ? { left: '-8px' }
-                        : pos.x > 70
-                          ? { right: '-8px' }
-                          : { left: '50%', transform: 'translateX(-50%)' }),
-                    }}
-                    initial={{ opacity: 0, y: pos.y > 50 ? 6 : -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: pos.y > 50 ? 6 : -6 }}
-                    transition={{ duration: 0.15 }}
-                  >
-                    <div
-                      className="dossier rounded-xl shadow-2xl w-64"
-                      style={{
-                        padding: '1.25rem 1.5rem',
-                        boxShadow: `0 8px 32px rgba(0,0,0,0.5), 0 0 1px ${pinColor}40`,
-                      }}
-                    >
-                      {/* Placeholder image */}
-                      <div className="mb-3 rounded-lg overflow-hidden">
-                        <PlaceholderImage
-                          width={208}
-                          height={90}
-                          label={`${unit.city}, ${unit.country}`}
-                          bgColor="#0b0f24"
-                        />
-                      </div>
+                  <p className="text-amber-400 font-bold text-sm mb-0.5" style={{ fontFamily: "'Fredoka', sans-serif" }}>
+                    {unit.city}, {unit.country}
+                  </p>
 
-                      {/* Location */}
-                      <p className="text-amber-400 font-bold text-sm mb-0.5" style={{ fontFamily: "'Fredoka', sans-serif" }}>
-                        {unit.city}, {unit.country}
-                      </p>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: pinColor }} />
+                    <p className="text-xs font-bold tracking-wider" style={{ color: pinColor }}>
+                      {statusLabel[status]}
+                    </p>
+                  </div>
 
-                      {/* Status badge */}
-                      <div className="flex items-center gap-1.5 mb-2">
-                        <div className="w-2 h-2 rounded-full" style={{ backgroundColor: pinColor }} />
-                        <p className="text-xs font-bold tracking-wider" style={{ color: pinColor }}>
-                          {statusLabel[status]}
-                        </p>
-                      </div>
+                  <p className="text-white text-sm font-medium mb-1">{unit.title}</p>
+                  <p className="text-gray-400 text-xs leading-relaxed">{unit.description}</p>
 
-                      {/* Mission info */}
-                      <p className="text-white text-sm font-medium mb-1">{unit.title}</p>
-                      <p className="text-gray-400 text-xs leading-relaxed">{unit.description}</p>
-
-                      {unitProgress?.timesCompleted ? (
-                        <p className="text-success text-xs font-bold mt-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                          Completed {unitProgress.timesCompleted}x
-                        </p>
-                      ) : null}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                  {unitProgress?.timesCompleted ? (
+                    <p className="text-success text-xs font-bold mt-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                      Completed {unitProgress.timesCompleted}x
+                    </p>
+                  ) : null}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           );
         })}
 

@@ -47,22 +47,6 @@ export default function LoginPage() {
         <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-amber-400/30 rounded-bl-lg" />
 
         <div className="text-center mb-8">
-          {/* Shield badge */}
-          <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(251,191,36,0.15), rgba(45,212,191,0.1))',
-              border: '1px solid rgba(251,191,36,0.25)',
-            }}
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-          >
-            <span className="text-3xl" style={{ fontFamily: "'Fredoka', sans-serif", color: '#fbbf24' }}>
-              M
-            </span>
-          </motion.div>
-
           <h1
             className="text-3xl font-bold mb-2"
             style={{
@@ -78,7 +62,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5 px-4">
           {error && (
             <motion.div
               className="bg-danger/10 border border-danger/40 text-red-300 rounded-xl p-3 text-sm"
@@ -99,7 +83,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-midnight-950 border border-midnight-500 rounded-xl text-white placeholder-gray-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition"
+              className="w-full py-3 bg-midnight-950 border border-midnight-500 rounded-xl text-white placeholder-gray-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition" style={{ paddingLeft: '0.2in', paddingRight: '0.2in' }}
               placeholder="agent@example.com"
             />
           </div>
@@ -114,7 +98,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 bg-midnight-950 border border-midnight-500 rounded-xl text-white placeholder-gray-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition"
+              className="w-full py-3 bg-midnight-950 border border-midnight-500 rounded-xl text-white placeholder-gray-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition" style={{ paddingLeft: '0.2in', paddingRight: '0.2in' }}
               placeholder="Enter your secret code"
             />
           </div>
@@ -122,7 +106,7 @@ export default function LoginPage() {
           <motion.button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 text-midnight-950 font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            className="w-full mt-4! py-3.5 text-midnight-950 font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             style={{
               background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
               boxShadow: '0 4px 20px rgba(251, 191, 36, 0.25)',
@@ -134,7 +118,7 @@ export default function LoginPage() {
           </motion.button>
         </form>
 
-        <p className="text-center mt-6 text-gray-500 text-sm">
+        <p className="text-center mt-6 text-gray-500 text-sm px-4">
           New agent?{' '}
           <Link to="/signup" className="text-amber-400 hover:text-amber-300 font-medium transition">
             Create your profile

@@ -37,7 +37,8 @@ export default function SignUpPage() {
     }
   };
 
-  const inputClass = "w-full px-4 py-3 bg-midnight-950 border border-midnight-500 rounded-xl text-white placeholder-gray-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition";
+  const inputClass = "w-full py-3 bg-midnight-950 border border-midnight-500 rounded-xl text-white placeholder-gray-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition";
+  const inputStyle = { paddingLeft: '0.2in', paddingRight: '0.2in' };
   const labelClass = "block text-teal-400/80 mb-1.5 font-medium tracking-wide uppercase";
 
   return (
@@ -62,21 +63,6 @@ export default function SignUpPage() {
         <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-teal-400/30 rounded-bl-lg" />
 
         <div className="text-center mb-8">
-          <motion.div
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(45,212,191,0.15), rgba(251,191,36,0.1))',
-              border: '1px solid rgba(45,212,191,0.25)',
-            }}
-            initial={{ scale: 0, rotate: 180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-          >
-            <span className="text-2xl" style={{ fontFamily: "'Fredoka', sans-serif", color: '#2dd4bf' }}>
-              +
-            </span>
-          </motion.div>
-
           <h1
             className="text-3xl font-bold mb-2"
             style={{
@@ -92,7 +78,7 @@ export default function SignUpPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 px-4">
           {error && (
             <motion.div
               className="bg-danger/10 border border-danger/40 text-red-300 rounded-xl p-3 text-sm"
@@ -113,7 +99,7 @@ export default function SignUpPage() {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               required
-              className={inputClass}
+              className={inputClass} style={inputStyle}
               placeholder="What should we call you?"
             />
           </div>
@@ -128,7 +114,7 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className={inputClass}
+              className={inputClass} style={inputStyle}
               placeholder="agent@example.com"
             />
           </div>
@@ -143,7 +129,7 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className={inputClass}
+              className={inputClass} style={inputStyle}
               placeholder="At least 6 characters"
             />
           </div>
@@ -158,7 +144,7 @@ export default function SignUpPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className={inputClass}
+              className={inputClass} style={inputStyle}
               placeholder="Type it again"
             />
           </div>
@@ -166,7 +152,7 @@ export default function SignUpPage() {
           <motion.button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 text-midnight-950 font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
+            className="w-full mt-4! py-3.5 text-midnight-950 font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed text-lg"
             style={{
               background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
               boxShadow: '0 4px 20px rgba(251, 191, 36, 0.25)',
@@ -178,7 +164,7 @@ export default function SignUpPage() {
           </motion.button>
         </form>
 
-        <p className="text-center mt-6 text-gray-500 text-sm">
+        <p className="text-center mt-6 text-gray-500 text-sm px-4">
           Already an agent?{' '}
           <Link to="/login" className="text-amber-400 hover:text-amber-300 font-medium transition">
             Sign in

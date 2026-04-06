@@ -59,7 +59,7 @@ export default function Navbar() {
           {user ? (
             <>
               <span
-                className="text-sm hidden sm:inline px-3 py-1 rounded-full border border-midnight-500 text-teal-400"
+                className="text-sm hidden sm:inline text-teal-400"
                 style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.8rem' }}
               >
                 AGENT {user.displayName?.toUpperCase()}
